@@ -1,38 +1,100 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  height: 100vh;
+  background: #1b85f6;
+  font-family: Montserrat
+}
+.chat-container {
+  height: 90vh;
+  width: 50%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column
+}
+.chat-header {
+  color: #fff
+}
+.chat-body {
+  flex: 1;
+  overflow: auto;
+  border-radius: 1rem 1rem 0 0;
+  background: #f3f3f3;
+  text-align: left;
+  padding: 1rem;
+  scroll-behavior: smooth;
+  background-attachment: local;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 70 70' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M0 0h35v35H0V0zm5 5h25v25H5V5zm5 5h15v15H10V10zm5 5h5v5h-5v-5zM40 5h25v25H40V5zm5 5h15v15H45V10zm5 5h5v5h-5v-5zM70 35H35v35h35V35zm-5 5H40v25h25V40zm-5 5H45v15h15V45zm-5 5h-5v5h5v-5zM30 40H5v25h25V40zm-5 5H10v15h15V45zm-5 5h-5v5h5v-5z'/%3E%3C/g%3E%3C/svg%3E")
+}
+.chat-body ul {
+  padding: 0
+}
+.chat-form {
+  display: flex
+}
+.label-submit {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: #00bfff;
+  cursor: pointer
 }
-
-.App-link {
-  color: #61dafb;
+.label-submit:hover {
+  fill: white;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.chat-form > input[type=text] {
+  padding: 1rem;
+  flex: 3
+}
+.message {
+  max-width: 90%;
+  float: left;
+  clear: both;
+  list-style: none;
+  padding: 1rem;
+  background-color: #90ee90;
+  border-radius: .5rem;
+  margin-bottom: .5rem;
+  min-width: 110px;
+  position: relative;
+  animation: scaleIn .3s ease-out
+}
+.message.you {
+  float: right;
+  background-color: #00bfff
+}
+.message-sender {
+  position: absolute;
+  font-size: .5rem;
+  font-weight: 800;
+  top: .2rem;
+  right: .2rem;
+  color: #fff
+}
+.underline {
+  text-decoration: underline
+}
+@keyframes scaleIn {
+  0% {
+    transform: scale(0) translate(0,100px)
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    transform: scale(1) translate(0)
+  }
+}
+@media (max-width:480px) {
+  html {
+    font-size: 14px
+  }
+  .chat-container {
+    width: 100%;
+    height: 100vh
+  }
+  .chat-body {
+    border-radius: 0
   }
 }
