@@ -30,14 +30,16 @@ function playSound(soundElement) {
 }
 
 function App() {
+  const [userName, setUserName] = useState("User 1");
+  const [userId, setUserId] = useState("...");
+
   const [isStarted, setStarted] = useState(false);
-  const [status, setStatus] = useState("Not Started");
-  const [users, setUsers] = useState([]);
+  const [status, setStatus] = useState("Normal");
+  const [players, setUsers] = useState([]);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState("...");
-  const [usersOn, setUsersOn] = useState(0);
   const messageContainer = useRef(null);
   const notificationSound = useRef(null);
 
@@ -48,12 +50,12 @@ function App() {
       awsSocket = new WebSocket("wss://bcxf3ewhj8.execute-api.us-east-1.amazonaws.com/dev");
 
       awsSocket.onopen = () => {
-        awsSocket.send(JSON.stringify({ action: "status" }));
-        awsSocket.send(JSON.stringify({ action: "name_request" }));
+        awsSocket.send(JSON.stringify({ action: "set_name", name: "User 1" }));
+        awsSocket.send(JSON.stringify({ action: "get_status" }));
 
         // for testing
         setUsers([
-          { name: "Player 1", color: "success", status: "Not started" },
+          { name: "Player 1", color: "success", status: "Normal" },
           { name: "Player 2", color: "danger", status: "Searching" },
         ]);
       };
@@ -65,7 +67,7 @@ function App() {
             setUser(message.content);
             break;
           case "status":
-            setUsersOn(message.content);
+            // setUsersOn(message.content);
             break;
           default:
             setMessages((prev) => [...prev, { sender: message.sender, content: message.content }]);
@@ -73,7 +75,7 @@ function App() {
       };
       awsSocket.onerror = (error) => console.log("Error occured", error);
     }
-  }, [setMessages, setUsersOn]);
+  }, [setMessages]);
 
   useEffect(() => {
     if (autoScroll) messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
@@ -96,9 +98,9 @@ function App() {
     setStarted(!isStarted);
 
     if (isStarted) {
-      setStatus("Not started.");
+      setStatus("Normal");
     } else {
-      setStatus("Searching...");
+      setStatus("Searching");
     }
   };
 
@@ -106,25 +108,27 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className="App">
         <div className="chat-container">
-          <div className="chat-header">
-            <h1>
-              Your ID is <span className="underline">{user}</span>
-            </h1>
-            <h2>
-              There are currently <span className="underline">{usersOn}</span> user(s) in the chat.
+          <div className="self-info-group">
+            <h2 style={{ textAlign: "left" }}>
+              <span className="header-item">Name : </span>
+              {userName}
             </h2>
-          </div>
+            <h2 style={{ textAlign: "left" }}>
+              <span className="header-item">ID : </span>
+              {userId}
+            </h2>
+            <h2 style={{ textAlign: "left" }}>
+              <span className="header-item">Status : </span>
+              {status}
+            </h2>
 
-          <div className="button-group">
             <Button variant="contained" style={{ width: "120px" }} color={isStarted ? "secondary" : "primary"} onClick={startOrCancelMatch}>
               {isStarted ? "Cancel" : "Start 1v1"}
             </Button>
-
-            <span className="status-text">{status}</span>
           </div>
 
           <div className="button-group">
-            <PlayerList users={users} />
+            <PlayerList players={players} />
           </div>
 
           <div className="chat-body" ref={messageContainer} onScroll={(e) => scrollHandler(e, setMessages)} data-testid="chat-body">

@@ -8,6 +8,27 @@
   font-family: Montserrat;
 }
 
+.chat-container {
+  height: 90vh;
+  width: 50%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.self-info-group {
+  background-color: white;
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.header-item {
+  width: 220px;
+  display: inline-block;
+  text-align: right;
+  margin-right: 20px;
+}
+
 .button-group {
   background-color: white;
   margin-bottom: 20px;
@@ -21,17 +42,6 @@
   font-weight: bold;
 }
 
-.chat-container {
-  height: 90vh;
-  width: 50%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-header {
-  color: #fff;
-}
 .chat-body {
   flex: 1;
   overflow: auto;
