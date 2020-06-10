@@ -66,7 +66,7 @@ function App() {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case "ans_name":
-            setUserId(message.ID);
+            setUserId(message.Id);
             break;
           case "status":
             setPlayers(message.players);
@@ -112,13 +112,14 @@ function App() {
     } else {
       setStatus("Searching");
     }
+
+    awsSocket.send(JSON.stringify({ action: "change_status", status: status }));
   };
 
   const createSession = (e) => {
     console.log("clicked Create Session button.");
 
-    awsSocket.send(JSON.stringify({ action: "set_name", name: userName }));
-    awsSocket.send(JSON.stringify({ sessionId: "xxx123", clientId: oponentId }));
+    awsSocket.send(JSON.stringify({ action: "sync_session", sessionId: "xxx123", oponentId }));
   };
 
   const joinSession = (sessionId) => {
