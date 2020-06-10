@@ -30,14 +30,17 @@ function playSound(soundElement) {
 }
 
 function App() {
-  const [userName] = useState("User 1");
+  const userIndex = Math.floor(Math.random() * 10) + 1;
+  const [userName] = useState("User" + userIndex);
   const [userId, setUserId] = useState("...");
 
   const [isStarted, setStarted] = useState(false);
   const [status, setStatus] = useState("Normal");
   const [players, setPlayers] = useState([]);
   const [canStartSession, setCanStartSession] = useState(false);
+  const [canJoinSession, setCanJoinSession] = useState(false);
   const [oponentId, setOponentId] = useState("");
+  const [sessionId, setSessionId] = useState("");
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -53,13 +56,12 @@ function App() {
 
       awsSocket.onopen = () => {
         awsSocket.send(JSON.stringify({ action: "set_name", name: userName }));
-        awsSocket.send(JSON.stringify({ action: "get_status" }));
 
         // for testing
-        setPlayers([
-          { name: "Player 1", color: "success", status: "Normal" },
-          { name: "Player 2", color: "danger", status: "Searching" },
-        ]);
+        // setPlayers([
+        //   { name: "Player 1", color: "success", status: "Normal" },
+        //   { name: "Player 2", color: "danger", status: "Searching" },
+        // ]);
       };
       awsSocket.onclose = () => console.log("Socket closed");
       awsSocket.onmessage = (event) => {
@@ -67,8 +69,10 @@ function App() {
         switch (message.type) {
           case "ans_name":
             setUserId(message.Id);
+            awsSocket.send(JSON.stringify({ action: "get_status" }));
             break;
           case "status":
+            addPlayerColors(message.players);
             setPlayers(message.players);
             break;
           case "create_session":
@@ -76,7 +80,8 @@ function App() {
             setOponentId(message.oponentId);
             break;
           case "join_session":
-            joinSession(message.sessionId);
+            setCanJoinSession(true);
+            setSessionId(message.sessionId);
             break;
 
           default:
@@ -91,6 +96,18 @@ function App() {
     if (autoScroll) messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
     if (messages.length > 0 && messages[messages.length - 1].sender !== user) playSound(notificationSound.current);
   }, [messages, user]);
+
+  const addPlayerColors = (playerList) => {
+    for (const player of playerList) {
+      if (player.status === "Normal") {
+        player.color = "success";
+      } else if (player.status === "Searching") {
+        player.color = "danger";
+      } else {
+        player.color = "primary";
+      }
+    }
+  };
 
   const changeHandler = (e) => {
     setMessage(e.target.value);
@@ -107,13 +124,16 @@ function App() {
 
     setStarted(!isStarted);
 
-    if (isStarted) {
-      setStatus("Normal");
+    let newStatus;
+    if (!isStarted) {
+      newStatus = "Searching";
     } else {
-      setStatus("Searching");
+      newStatus = "Normal";
     }
 
-    awsSocket.send(JSON.stringify({ action: "change_status", status: status }));
+    setStatus(newStatus);
+
+    awsSocket.send(JSON.stringify({ action: "change_status", status: newStatus }));
   };
 
   const createSession = (e) => {
@@ -122,27 +142,23 @@ function App() {
     awsSocket.send(JSON.stringify({ action: "sync_session", sessionId: "xxx123", oponentId }));
   };
 
-  const joinSession = (sessionId) => {
-    console.log("joinning session : ", sessionId);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
         <div className="chat-container">
           <div className="self-info-group">
-            <h2 style={{ textAlign: "left" }}>
+            <h3 style={{ textAlign: "left" }}>
               <span className="header-item">Name : </span>
               {userName}
-            </h2>
-            <h2 style={{ textAlign: "left" }}>
+            </h3>
+            <h3 style={{ textAlign: "left" }}>
               <span className="header-item">ID : </span>
               {userId}
-            </h2>
-            <h2 style={{ textAlign: "left" }}>
+            </h3>
+            <h3 style={{ textAlign: "left" }}>
               <span className="header-item">Status : </span>
               {status}
-            </h2>
+            </h3>
 
             <div>
               <Button variant="contained" style={{ width: "120px" }} color={isStarted ? "secondary" : "primary"} onClick={startOrCancelMatch}>
@@ -155,6 +171,17 @@ function App() {
                 Create Session
               </Button>
             </div>
+
+            <div style={{ margin: "15px" }}>
+              <Button variant="contained" color="primary" disabled={!canJoinSession}>
+                Join Session
+              </Button>
+            </div>
+
+            <h3 style={{ textAlign: "left" }}>
+              <span className="header-item">Session ID : </span>
+              {sessionId}
+            </h3>
           </div>
 
           <div className="button-group">
