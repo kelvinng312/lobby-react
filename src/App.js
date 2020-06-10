@@ -30,16 +30,18 @@ function playSound(soundElement) {
 }
 
 function App() {
-  const [userName, setUserName] = useState("User 1");
+  const [userName] = useState("User 1");
   const [userId, setUserId] = useState("...");
 
   const [isStarted, setStarted] = useState(false);
   const [status, setStatus] = useState("Normal");
-  const [players, setUsers] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [canStartSession, setCanStartSession] = useState(false);
+  const [oponentId, setOponentId] = useState("");
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [user, setUser] = useState("...");
+  const [user] = useState("...");
   const messageContainer = useRef(null);
   const notificationSound = useRef(null);
 
@@ -50,11 +52,11 @@ function App() {
       awsSocket = new WebSocket("wss://bcxf3ewhj8.execute-api.us-east-1.amazonaws.com/dev");
 
       awsSocket.onopen = () => {
-        awsSocket.send(JSON.stringify({ action: "set_name", name: "User 1" }));
+        awsSocket.send(JSON.stringify({ action: "set_name", name: userName }));
         awsSocket.send(JSON.stringify({ action: "get_status" }));
 
         // for testing
-        setUsers([
+        setPlayers([
           { name: "Player 1", color: "success", status: "Normal" },
           { name: "Player 2", color: "danger", status: "Searching" },
         ]);
@@ -63,19 +65,27 @@ function App() {
       awsSocket.onmessage = (event) => {
         const message = JSON.parse(event.data);
         switch (message.type) {
-          case "request":
-            setUser(message.content);
+          case "ans_name":
+            setUserId(message.ID);
             break;
           case "status":
-            // setUsersOn(message.content);
+            setPlayers(message.players);
             break;
+          case "create_session":
+            setCanStartSession(true);
+            setOponentId(message.oponentId);
+            break;
+          case "join_session":
+            joinSession(message.sessionId);
+            break;
+
           default:
             setMessages((prev) => [...prev, { sender: message.sender, content: message.content }]);
         }
       };
       awsSocket.onerror = (error) => console.log("Error occured", error);
     }
-  }, [setMessages]);
+  }, [setMessages, userName]);
 
   useEffect(() => {
     if (autoScroll) messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
@@ -104,6 +114,17 @@ function App() {
     }
   };
 
+  const createSession = (e) => {
+    console.log("clicked Create Session button.");
+
+    awsSocket.send(JSON.stringify({ action: "set_name", name: userName }));
+    awsSocket.send(JSON.stringify({ sessionId: "xxx123", clientId: oponentId }));
+  };
+
+  const joinSession = (sessionId) => {
+    console.log("joinning session : ", sessionId);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
@@ -122,9 +143,17 @@ function App() {
               {status}
             </h2>
 
-            <Button variant="contained" style={{ width: "120px" }} color={isStarted ? "secondary" : "primary"} onClick={startOrCancelMatch}>
-              {isStarted ? "Cancel" : "Start 1v1"}
-            </Button>
+            <div>
+              <Button variant="contained" style={{ width: "120px" }} color={isStarted ? "secondary" : "primary"} onClick={startOrCancelMatch}>
+                {isStarted ? "Cancel" : "Start 1v1"}
+              </Button>
+            </div>
+
+            <div style={{ margin: "15px" }}>
+              <Button variant="contained" color="primary" onClick={createSession} disabled={!canStartSession}>
+                Create Session
+              </Button>
+            </div>
           </div>
 
           <div className="button-group">
