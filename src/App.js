@@ -24,10 +24,7 @@ function scrollHandler(e) {
   else autoScroll = false;
 }
 
-function playSound(soundElement) {
-  soundElement.currentTime = 0;
-  soundElement.play();
-}
+function playSound(soundElement) {}
 
 function App() {
   const [userName, setUserName] = useState("Visitor");
@@ -51,10 +48,10 @@ function App() {
     if (!awsSocket) {
       // awsSocket = new WebSocket("wss://mt57ra0zm9.execute-api.us-east-1.amazonaws.com/prod");
       // awsSocket = new WebSocket("ws://localhost:3001");
-      awsSocket = new WebSocket("wss://bcxf3ewhj8.execute-api.us-east-1.amazonaws.com/dev");
+      awsSocket = new WebSocket("wss://32jaybfcy3.execute-api.us-east-1.amazonaws.com/dev");
 
       awsSocket.onopen = () => {
-        awsSocket.send(JSON.stringify({ action: "set_name", name: userName }));
+        awsSocket.send(JSON.stringify({ action: "set_name", playerName: userName }));
 
         // for testing
         // setPlayers([
@@ -67,7 +64,7 @@ function App() {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case "ans_name":
-            setUserName(message.name);
+            setUserName(message.playerName);
             setUserId(message.Id);
             awsSocket.send(JSON.stringify({ action: "get_status" }));
             break;
@@ -99,9 +96,9 @@ function App() {
 
   const addPlayerColors = (playerList) => {
     for (const player of playerList) {
-      if (player.status === "Normal") {
+      if (player.playerStatus === "Normal") {
         player.color = "success";
-      } else if (player.status === "Searching") {
+      } else if (player.playerStatus === "Searching") {
         player.color = "danger";
       } else {
         player.color = "primary";
@@ -124,16 +121,16 @@ function App() {
 
     setStarted(!isStarted);
 
-    let newStatus;
+    let newPlayerStatus;
     if (!isStarted) {
-      newStatus = "Searching";
+      newPlayerStatus = "Searching";
     } else {
-      newStatus = "Normal";
+      newPlayerStatus = "Normal";
     }
 
-    setStatus(newStatus);
+    setStatus(newPlayerStatus);
 
-    awsSocket.send(JSON.stringify({ action: "change_status", status: newStatus }));
+    awsSocket.send(JSON.stringify({ action: "change_status", playerStatus: newPlayerStatus }));
   };
 
   const createSession = (e) => {

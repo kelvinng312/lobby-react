@@ -6,9 +6,9 @@ function PlayerList({ players }) {
     <div>
       {players.map((player, index) => (
         <div key={index}>
-          <span style={{ width: "200px", display: "inline-block" }}>{player.name}</span>
+          <span style={{ width: "200px", display: "inline-block" }}>{player.playerName}</span>
           <StatusBullet color={player.color} size="sm" />
-          <span style={{ width: "120px", display: "inline-block" }}>{player.status}</span>
+          <span style={{ width: "120px", display: "inline-block" }}>{player.playerStatus}</span>
         </div>
       ))}
     </div>
