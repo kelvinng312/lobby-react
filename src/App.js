@@ -30,8 +30,7 @@ function playSound(soundElement) {
 }
 
 function App() {
-  const userIndex = Math.floor(Math.random() * 10) + 1;
-  const [userName] = useState("User" + userIndex);
+  const [userName, setUserName] = useState("Visitor");
   const [userId, setUserId] = useState("...");
 
   const [isStarted, setStarted] = useState(false);
@@ -68,6 +67,7 @@ function App() {
         const message = JSON.parse(event.data);
         switch (message.type) {
           case "ans_name":
+            setUserName(message.name);
             setUserId(message.Id);
             awsSocket.send(JSON.stringify({ action: "get_status" }));
             break;
